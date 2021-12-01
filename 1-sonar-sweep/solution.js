@@ -24,7 +24,7 @@ function part2(input) {
   for (let index = 0; index < input.length; index++) {
     const [one, two, three] = input.slice(index);
 
-    if(!(one || two || three)) break;
+    if(!(one && two && three)) break;
 
     const sum = one + two + three;
     if(sum > lastSum && lastSum !== -1) {
