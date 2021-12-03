@@ -6,7 +6,16 @@ let measurements = fs.readFileSync('./measurements.txt')
 
 //gets most often occuring element in array
 function mode(array) {
-    con
+    const elemMap = {};
+    array.forEach(bit => {
+        if(!(bit in elemMap)) { 
+            elemMap[bit] = 0;
+        }
+
+        elemMap[bit]++;
+    })
+
+    return Object.keys(elemMap).reduce(function(a, b){ return elemMap[a] > elemMap[b] ? a : b });
 }
 
 function notBinString(binString) {
