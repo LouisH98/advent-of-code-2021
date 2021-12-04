@@ -8,7 +8,7 @@ const LENGTH_OF_MEASUREMENT = 12;
 
 // gets most often occuring element in array
 // if shouldDraw: returns '-' if there is a equal number of 1s and 0s
-function mode(array, shouldDraw) {
+function mode(array, canDraw) {
     const elemMap = {};
     array.forEach(bit => {
         if(!(bit in elemMap)) { 
@@ -18,7 +18,7 @@ function mode(array, shouldDraw) {
         elemMap[bit]++;
     })
 
-    if(shouldDraw && elemMap['0'] === elemMap['1']) return '-';
+    if(canDraw && elemMap['0'] === elemMap['1']) return '-';
     return  Object.keys(elemMap).reduce(function(a, b){ return elemMap[a] > elemMap[b] ? a : b });
 }
 
@@ -60,17 +60,32 @@ function part2() {
         return source.filter((_, index) => indexes.includes(index));
     }
 
-    let getRating = () => {
+    let getRating = (ratingType = 'oxygen') => {
         let filteredMeasurements = [...measurements];
         for (let index = 0; index < LENGTH_OF_MEASUREMENT; index++) {
-            const columnList = measurements.map(elem => elem[index]);
-            const mostOftenOccuring = mode(columnList);
-            const indexesToRemove = getIndexesOfValue(mostOftenOccuring === '1' ? '0' : '1', columnList);
+            const columnList = filteredMeasurements.map(elem => elem[index]);
+            const mostOftenOccuring = mode(columnList, true);
+
+            let typeToRemove = mostOftenOccuring;
+            if(mostOftenOccuring === '-') {
+                typeToRemove = ratingType === 'oxygen' ? '1' : '0';
+            } 
+            else if(ratingType !== 'oxygen') {
+                typeToRemove = mostOftenOccuring === '1' ? '0' : '1';
+            }
+
+            const indexesToRemove = getIndexesOfValue(typeToRemove === '1' ? '0' : '1', columnList);
             filteredMeasurements = removeIndexesFromArray(filteredMeasurements, indexesToRemove);
+
+            if(filteredMeasurements.length === 1) {
+                return filteredMeasurements[0];
+            }
         }
     }
 
-    getRating();
+    const oxygen = getRating('oxygen');
+    const co2 = getRating('co2');
+    return parseInt(oxygen, 2) * parseInt(co2, 2);
 }
 
 console.log(`Part 1: ${part1()}`);
