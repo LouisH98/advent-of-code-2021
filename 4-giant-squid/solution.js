@@ -6,7 +6,6 @@ const bingoNumbers = inputFile[0].split(',').map(Number);
 class BingoCard {
     board =  Array(5).fill(null).map(x => Array(5).fill(null));
     hasWonAlready = false;
-    id = Math.random()
     constructor(boardString) {
         //parse input 
         let boardRows = boardString.replace(/\n/g, '').split("\r");
@@ -21,7 +20,10 @@ class BingoCard {
     draw(value) {
         this.board.forEach(row => {
             row.forEach(element => {
-                if(element.val === value) element.marked = true;
+                if (!element.marked){
+                    console.log("Drawing", element, value);
+                    if(element.val === value) element.marked = true;
+                }
             })
         })
         return this.hasWon();
@@ -53,7 +55,7 @@ class BingoCard {
 
             if(scoreHorizontal === row.length || scoreVertical === row.length) {
                 this.hasWonAlready = true;
-                return {won: true, sum: this.getUnmarkedNumbers().reduce((accumulator, val) => accumulator + val, 0)};
+                return {won: true, sum: this.getUnmarkedNumbers().reduce((accumulator, val) => accumulator + val)};
             } else {
                 return {won: false};
             }
@@ -93,13 +95,15 @@ function part2(){
         const number = bingoNumbers[i];
         for(let j = 0; j < cards.length; j++) {
             const card = cards[j];
-            const winStatus = card.draw(number);
-            if(winStatus.won && !winners.includes(card)){
-                winners.push(card);
-            }
-
-            if(winners.length === boards.length) {
-                return winStatus.sum * number
+            if(!card.hasWonAlready) {
+                const winStatus = card.draw(number);
+                if(winStatus.won && !winners.includes(card)){
+                    winners.push(card);
+                }
+    
+                if(winners.length === cards.length) {
+                    return winStatus.sum * number
+                }
             }
         }
     }
