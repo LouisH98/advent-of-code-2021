@@ -12,20 +12,23 @@ class BingoCard {
         for (let i = 0; i < boardRows.length; i++) {
             const cols = boardRows[i].split(' ').filter(val => val.length > 0);
             for (let j = 0; j < cols.length; j++) {
-                this.board[i][j] = {val: parseInt(cols[j]), marked: false}
+                this.board[i][j] = {val: Number(cols[j]), marked: false}
             }
         }
     }
 
     draw(value) {
-        this.board.forEach(row => {
-            row.forEach(element => {
-                if (!element.marked){
-                    console.log("Drawing", element, value);
-                    if(element.val === value) element.marked = true;
+        for (let i = 0; i < this.board.length; i++) {
+            const row = this.board[i];
+            for (let j = 0; j < row.length; j++) {
+                const element = this.board[i][j];
+                if(element.val === value && !element.marked && ! this.hasWonAlready) {
+                    element.marked = true;
+                    return this.hasWon();
                 }
-            })
-        })
+            }
+        }
+
         return this.hasWon();
     }
 
@@ -56,10 +59,9 @@ class BingoCard {
             if(scoreHorizontal === row.length || scoreVertical === row.length) {
                 this.hasWonAlready = true;
                 return {won: true, sum: this.getUnmarkedNumbers().reduce((accumulator, val) => accumulator + val)};
-            } else {
-                return {won: false};
-            }
+            } 
         }
+        return {won: false};
     }
 }
 
@@ -81,7 +83,6 @@ function part1(){
             const cardStatus = card.draw(number);
 
             if(cardStatus.won) {
-                console.log(`Won! ${cardStatus.sum}`)
                 return cardStatus.sum * number;
             }
         }
@@ -90,24 +91,22 @@ function part1(){
 
 function part2(){
     const cards = getCards();
-    let winners = [];
-    for(let i = 0; i < bingoNumbers.length; i++) {
-        const number = bingoNumbers[i];
-        for(let j = 0; j < cards.length; j++) {
-            const card = cards[j];
-            if(!card.hasWonAlready) {
-                const winStatus = card.draw(number);
-                if(winStatus.won && !winners.includes(card)){
-                    winners.push(card);
-                }
-    
-                if(winners.length === cards.length) {
-                    return winStatus.sum * number
+    let lastWinInfo = null;
+    let lastNumberToWin = null;
+
+    bingoNumbers.forEach(number => {
+        cards.forEach(card => {
+            if(!card.hasWonAlready && !cards.every(card => card.hasWonAlready)) { 
+                let result = card.draw(number);
+                
+                if(result.won && result.sum > 0) {
+                    lastWinInfo = result;
+                    lastNumberToWin = number;
                 }
             }
-        }
-    }
-    return winSum * lastNumberToWin;
+        })
+    })
+    return lastWinInfo.sum * lastNumberToWin;
 }
 console.log(`Part 1: ${part1()}`);
 console.log(`Part 2: ${part2()}`);
