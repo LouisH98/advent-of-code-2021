@@ -5,6 +5,8 @@ const bingoNumbers = inputFile[0].split(',').map(Number);
 
 class BingoCard {
     board =  Array(5).fill(null).map(x => Array(5).fill(null));
+    hasWonAlready = false;
+    id = Math.random()
     constructor(boardString) {
         //parse input 
         let boardRows = boardString.replace(/\n/g, '').split("\r");
@@ -22,7 +24,6 @@ class BingoCard {
                 if(element.val === value) element.marked = true;
             })
         })
-
         return this.hasWon();
     }
 
@@ -34,7 +35,6 @@ class BingoCard {
                 if(!value.marked) numbers.push(value.val);
             }
         }
-
         return numbers;
     }
 
@@ -52,7 +52,8 @@ class BingoCard {
             }
 
             if(scoreHorizontal === row.length || scoreVertical === row.length) {
-                return {won: true, sum: this.getUnmarkedNumbers().reduce((accumulator, val) => accumulator + val)};
+                this.hasWonAlready = true;
+                return {won: true, sum: this.getUnmarkedNumbers().reduce((accumulator, val) => accumulator + val, 0)};
             } else {
                 return {won: false};
             }
@@ -60,13 +61,18 @@ class BingoCard {
     }
 }
 
-function part1(){
-    //load in cards
+const getCards = () => {
     const cards = [];
 
     inputFile.slice(1).forEach(card => {
         cards.push(new BingoCard(card));
     });
+
+    return cards;
+};
+
+function part1(){
+    const cards = getCards();
 
     for(const number of bingoNumbers) {
         for(const card of cards) {
@@ -80,4 +86,24 @@ function part1(){
     }
 }
 
+function part2(){
+    const cards = getCards();
+    let winners = [];
+    for(let i = 0; i < bingoNumbers.length; i++) {
+        const number = bingoNumbers[i];
+        for(let j = 0; j < cards.length; j++) {
+            const card = cards[j];
+            const winStatus = card.draw(number);
+            if(winStatus.won && !winners.includes(card)){
+                winners.push(card);
+            }
+
+            if(winners.length === boards.length) {
+                return winStatus.sum * number
+            }
+        }
+    }
+    return winSum * lastNumberToWin;
+}
 console.log(`Part 1: ${part1()}`);
+console.log(`Part 2: ${part2()}`);
