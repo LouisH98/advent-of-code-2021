@@ -32,7 +32,7 @@ function getCorruptionScore(line, returnMissing = false){
             }
         }
     })
-
+    //return the values we have left on the stack, the reverse & inverse of these is the missing values;
     if(returnMissing) {
         return stack;
     }
