@@ -10,14 +10,14 @@ let tokenPairs = {
     '<': '>'
 };
 
-let tokenScores = {
-    ')': 3,
-    ']': 57,
-    '}': 1197,
-    '>': 25137
-}
-
-function getCorruptionScore(line){
+function getCorruptionScore(line, returnMissing = false){
+    let tokenScores = {
+        ')': 3,
+        ']': 57,
+        '}': 1197,
+        '>': 25137
+    }
+    
     let stack = [];
     let valueToReturn = 0;
     line.split('').forEach(char => {
@@ -32,6 +32,11 @@ function getCorruptionScore(line){
             }
         }
     })
+    //return the values we have left on the stack, the reverse & inverse of these is the missing values;
+    if(returnMissing) {
+        return stack;
+    }
+
     return valueToReturn;
 }
 
@@ -39,4 +44,26 @@ function part1(){
     return inputFile.reduce((acc, line) => acc + getCorruptionScore(line), 0);
 }
 
+function part2(){
+    let tokenScores = {
+        ')': 1,
+        ']': 2,
+        '}': 3,
+        '>': 4
+    }
+    let incompleteLines = inputFile.filter(line => getCorruptionScore(line) === 0);
+    let scores = [];
+    incompleteLines.forEach(line => {
+        let missingValues = getCorruptionScore(line, true).reverse().map(val => tokenPairs[val]);
+        scores.push(missingValues.reduce((acc, val) => {
+            acc *= 5
+            acc += tokenScores[val]
+            return acc
+        }, 0))
+    })
+
+    return new Float64Array(scores).sort()[(Math.round(scores.length - 1) / 2)]
+}
+
 console.log(`Part 1: ${part1()}`);
+console.log(`Part 2: ${part2()}`);
